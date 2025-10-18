@@ -1,0 +1,18 @@
+# Operating System and Editor Files
+.DS_Store
+*.swp
+.ipynb_checkpoints/
+
+# Python compiled files
+*.pyc
+__pycache__/
+
+# Dependencies (Virtual Environment)
+venv/
+env/
+
+# Data and Models (Keep these files out of the main repo!)
+# IMPORTANT: Your large synthetic data and trained models should go here.
+synthetic_batch_data.csv 
+*.pkl         # For Scikit-learn models
+*.h5          # For Keras/TensorFlow models
