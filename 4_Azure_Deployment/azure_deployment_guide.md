@@ -1,130 +1,188 @@
-Azure Deployment Guide: Predictive Batch AI POC
+```markdown
 
+\# 🔮 Predictive Batch AI POC — Azure Deployment Guide
 
 
-This guide outlines the proposed architecture and steps required to deploy the Predictive Batch AI solution using Microsoft Azure services. The goal is to move the local Python models and CSV knowledge base into an orchestrated, real-time web service.
 
+This repository outlines the architecture and deployment steps for operationalizing a Predictive Batch AI solution using Microsoft Azure. The goal is to transform local Python models and CSV knowledge into a real-time, orchestrated web service for anomaly detection and prescriptive guidance.
 
 
-1\. Architecture Overview
 
+---
 
 
-The solution follows a modern Machine Learning Operations (MLOps) architecture:
 
+\## 📐 Architecture Overview
 
 
-Data Ingestion: Synthetic data ($\\text{CSV}$ files) are uploaded to storage.
 
+The solution follows a modern MLOps pipeline:
 
 
-Model Deployment (Inference): The trained $\\text{PCA}$/$\\text{PLS}$ models are deployed as a secure endpoint.
 
+\- \*\*Data Ingestion\*\*: Synthetic batch data (`.csv`) uploaded to Azure Storage.
 
+\- \*\*Model Deployment\*\*: PCA/PLS models served via Azure ML real-time endpoints.
 
-Knowledge Base (RAG): $\\text{SOP}$ and $\\text{CAPA}$ knowledge is indexed for reliable retrieval.
+\- \*\*Knowledge Base (RAG)\*\*: SOP and CAPA documents indexed for retrieval.
 
+\- \*\*Orchestration \& UI\*\*: Azure Functions or Logic Apps trigger model inference and GenAI synthesis.
 
 
-Orchestration \& UI: An Azure Function or Logic App monitors the process, calls the Model Endpoint, and feeds the result to the $\\text{GenAI}$ $\\text{LLM}$ for final action.
 
+---
 
 
-2\. Key Azure Services Required
 
+\## 🧰 Azure Services Used
 
 
-Service
 
+| Service                    | Role                                                                 | Data Used                                      |
 
+|---------------------------|----------------------------------------------------------------------|------------------------------------------------|
 
-Component Role
+| Azure Machine Learning     | Hosts PCA/PLS/Scaler `.pkl` models as secure endpoints               | `pca\_model.pkl`, `pls\_model.pkl`, `scaler\_model.pkl` |
 
+| Azure Storage (Data Lake)  | Stores synthetic batch data and RAG source files                     | `synthetic\_batch\_data.csv`, `SOP\_knowledge.csv` |
 
+| Azure AI Search            | Indexes structured/unstructured knowledge for RAG                    | `SOP\_knowledge.csv`, `qa\_deviation\_reports.txt` |
 
-Data Used
+| Azure OpenAI Service       | Synthesizes alerts using LLMs                                        | Prompt Engineering                             |
 
+| Azure Functions / Logic Apps | Orchestrates data flow and triggers GenAI alerts                  | Real-time sensor data                          |
 
 
-Azure Machine Learning ($\\text{Azure}$ $\\text{ML}$)
 
+---
 
 
-Model Deployment/Inference. Hosts the serialized $\\text{PCA}$, $\\text{PLS}$, and $\\text{StandardScaler}$ ($\\text{.pkl}$) files as a secured web endpoint (via an $\\text{Azure}$ $\\text{Container}$ $\\text{Instance}$ or $\\text{Kubernetes}$ $\\text{Service}$).
 
+\## 🚀 Deployment Steps
 
 
-pca\_model.pkl, pls\_model.pkl, scaler\_model.pkl
 
+\### 1. Provision Storage
 
+Upload all files from:
 
-Azure Storage ($\\text{Data}$ $\\text{Lake}$)
+\- `1\_Data\_Generation`
 
+\- `3\_GenAI\_Knowledge\_Base`
 
 
-Data Historian. Stores the raw time-series data ($\\text{synthetic}\\\_\\text{batch}\\\_\\text{data.csv}$) and the $\\text{RAG}$ source files ($\\text{SOP}\\\_\\text{knowledge.csv}$).
 
+\### 2. Deploy Models
 
+\- Package `simulate\_genai\_trigger.py` logic (excluding local loading)
 
-All CSV/TXT Files
+\- Include `.pkl` files
 
+\- Deploy via Azure ML Real-time Endpoint
 
 
-Azure AI Search
 
+\### 3. Configure RAG
 
+\- Use Azure AI Search to index:
 
-RAG Retrieval Engine. Indexes the unstructured (qa\_deviation\_reports.txt) and structured (SOP\_knowledge.csv) knowledge bases to provide context for the $\\text{LLM}$.
+&nbsp; - `SOP\_knowledge.csv`
 
+&nbsp; - `qa\_deviation\_reports.txt`
 
 
-SOP\_knowledge.csv, qa\_deviation\_reports.txt
 
+\### 4. Build Orchestrator
 
+Create an Azure Function that:
 
-Azure OpenAI Service
+\- Monitors new data
 
+\- Calls ML endpoint for anomaly scoring
 
+\- Queries RAG system
 
-Generative AI ($\\text{LLM}$) Model. Provides the powerful text synthesis needed to turn raw fault codes into human-readable, prescriptive instructions.
+\- Synthesizes alert via Azure OpenAI
 
 
 
-Prompt Engineering
+\### 5. UI Integration
 
+Deliver final alert to:
 
+\- Microsoft Teams
 
-Azure Functions / Logic Apps
+\- Or a dedicated web UI (e.g., \*\*React Copilot Dashboard\*\*)
 
 
 
-The Orchestrator / Alert Trigger. A serverless compute unit that: 1. Reads new data. 2. Calls the Azure $\\text{ML}$ Endpoint. 3. Calls the $\\text{RAG}$ system. 4. Synthesizes the final alert message.
+---
 
 
 
-Real-time sensor data
+\## 📎 File Structure
 
 
 
-3\. High-Level Deployment Steps
+```
 
+├── 1\_Data\_Generation/
 
+│   └── synthetic\_batch\_data.csv
 
-Deploy Storage: Create an Azure Storage account and upload all files from the 1\_Data\_Generation and 3\_GenAI\_Knowledge\_Base folders.
+├── 2\_Model\_Artifacts/
 
+│   ├── pca\_model.pkl
 
+│   ├── pls\_model.pkl
 
-Deploy Models: Package the $\\text{Python}$ logic from simulate\_genai\_trigger.py (minus the loading code, which is replaced by the endpoint) and the three $\\text{.pkl}$ files into a Docker container. Deploy this container as an $\\text{Azure}$ $\\text{ML}$ Real-time Endpoint.
+│   └── scaler\_model.pkl
 
+├── 3\_GenAI\_Knowledge\_Base/
 
+│   ├── SOP\_knowledge.csv
 
-Configure RAG: Set up $\\text{Azure}$ $\\text{AI}$ $\\text{Search}$ to index the $\\text{SOP}\\\_\\text{knowledge.csv}$ and $\\text{qa}\\\_\\text{deviation}\\\_\\text{reports.txt}$ files.
+│   └── qa\_deviation\_reports.txt
 
+├── simulate\_genai\_trigger.py
 
+└── README.md
 
-Create Orchestrator: Build an $\\text{Azure}$ $\\text{Function}$ that runs every few minutes (simulating real-time monitoring). If the $\\text{ML}$ Endpoint returns an anomaly score above the threshold, the function constructs a prompt for the $\\text{LLM}$ via $\\text{Azure}$ $\\text{OpenAI}$, grounded by $\\text{Azure}$ $\\text{AI}$ $\\text{Search}$.
+```
 
 
 
-Final Output: The $\\text{Function}$ delivers the final structured alert (like the output of simulate\_genai\_trigger.py) to an end system (e.g., $\\text{Microsoft}$ $\\text{Teams}$ or a dedicated web UI like the one 
+---
+
+
+
+\## 🧠 Business Impact
+
+
+
+This POC demonstrates how AI-driven batch intelligence can:
+
+\- Detect anomalies in real-time
+
+\- Retrieve contextual SOP/CAPA guidance
+
+\- Generate prescriptive alerts for operators and compliance teams
+
+
+
+---
+
+
+
+\## 📬 Contact
+
+
+
+For questions or demo requests, reach out via \[LinkedIn](www.linkedin.com/in/michellemdavis) or open an issue in this repo.
+
+
+
+```
+
+
 
