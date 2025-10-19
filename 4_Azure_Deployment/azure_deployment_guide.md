@@ -1,7 +1,7 @@
 Azure Deployment Guide: Predictive Batch AI POC
 This guide outlines the proposed architecture and deployment steps for the Predictive Batch AI solution using Microsoft Azure services. The goal is to transform local Python models and CSV knowledge bases into an orchestrated, real-time web service.
 
-1. 🏗 Architecture Overview
+1.  Architecture Overview
 The solution follows a modern Machine Learning Operations (MLOps) architecture:
 - Data Ingestion: Synthetic data (.csv files) are uploaded to Azure Storage.
 - Model Deployment (Inference): Trained PCA/PLS models are deployed as secure endpoints.
@@ -9,16 +9,10 @@ The solution follows a modern Machine Learning Operations (MLOps) architecture:
 - Orchestration & UI: Azure Function or Logic App monitors the process, calls the model endpoint, and feeds the result to a GenAI LLM for final action.
 
 2. 🔧 Key Azure Services Required
-|  |  |  | 
-|  | .pkl | pca_model.pklpls_model.pklscaler_model.pkl | 
-|  |  | .csv.txt | 
-|  |  | SOP_knowledge.csvqa_deviation_reports.txt | 
-|  |  |  | 
-|  |  |  | 
+ .pkl | pca_model.pklpls_model.pklscaler_model.pkl  
+.csv.txt SOP_knowledge.csvqa_deviation_reports.txt 
 
-
-
-3. 🚀 High-Level Deployment Steps
+3. High-Level Deployment Steps
 ✅ Deploy Storage
 Create an Azure Storage account and upload all files from:
 - 1_Data_Generation
